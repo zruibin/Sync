@@ -9,7 +9,7 @@
 #include "sync.h"
 #include <iostream>
 #include <filesystem>
-
+#include "node.hpp"
 
 namespace fs = std::filesystem;
 
