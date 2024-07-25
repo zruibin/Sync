@@ -1,0 +1,12 @@
+# Xcode
+.DS_Store
+
+!*.swift
+#.build/**
+arm64-apple-macosx/**
+
+
+#CocoaPods
+#Pods
+.git/**
+.swiftpm/**

@@ -10,6 +10,9 @@
 #include <iostream>
 #include <filesystem>
 #include "node.hpp"
+#include "ignore/ignore.hpp"
+
+#define TESTDIR(path) PROJECT_DIR#path
 
 namespace fs = std::filesystem;
 
@@ -28,14 +31,30 @@ std::string getName(const fs::path& path, const char* home) {
 }
 
 void list_files_and_directories(const char *directory) {
+    uint count = 0;
+    
+    std::string content = ignore::ReadFile(TESTDIR(/test/gitignore));
+    std::cout << "content: " << content << std::endl;
+    std::cout << "--------------------------------------------------------------"
+                << "--------------------------------------------------------------"
+                << std::endl;
+    
+    ignore::GitignoreHelper helper = ignore::GitignoreHelper::Compile(content);
     for (const auto& entry : fs::recursive_directory_iterator(directory)) {
         std::string name = getName(entry.path(), directory);
+        
+        if (!helper.Accepts(name)) {
+            continue;
+        }
+        
+        ++count;
         if (fs::is_directory(entry.status())) {
             std::cout << "目录: " << name << std::endl;
         } else {
             std::cout << "文件: " << name << std::endl;
         }
     }
+    std::cout << "count: " << count << std::endl;
 }
 
 void WalkDirectory(const char *directory) {
