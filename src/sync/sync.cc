@@ -12,6 +12,7 @@
 #include "log/logging.h"
 #include "node.hpp"
 #include "ignore/ignore.hpp"
+#include "connection/network/network.h"
 
 #define TESTDIR(path) PROJECT_DIR#path
 
@@ -67,6 +68,8 @@ void WalkDirectory(const char *directory) {
     
     Log(DEBUG) << "--------------------------------------------------------------"
                 << "--------------------------------------------------------------";
+    
+    connection::PrintNetworkInfo();
     
     fs::path dir_path("/Users/ruibin.chow/Desktop/test/tmp/aa");
     // 创建新目录
