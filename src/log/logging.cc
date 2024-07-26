@@ -24,12 +24,12 @@ void SetMinWriteLogLevel(LoggingSeverity level) {
 
 static const char* loggingSeverityCover(LoggingSeverity severity) {
     static const char* severityList[] = {
+        [NONE] = "[N]",
         [VERBOSE] = "[V]",
-        [INFO] = "[I]",
         [DEBUG] = "[D]",
+        [INFO] = "[I]",
         [WARNING] = "[W]",
         [ERROR] = "[E]",
-        [NONE] = "[N]",
     };
     
     return severityList[severity];

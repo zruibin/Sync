@@ -245,7 +245,7 @@ list(APPEND EXECUTE_SOURCES ${ALL_SOURCES} ${HEADERS} ${SOURCES})
 
 
 add_executable(${TARGET} ${EXECUTE_SOURCES} ${RESOURCES})
-target_link_libraries(${TARGET} PRIVATE ${TARGET_LIB} ${DEPS_LIBS})
+target_link_libraries(${TARGET} PRIVATE ${TARGET_LIB} ${DEPS_LIBS} pthread)
 
 
 if(EXISTS "${PROJECT_SOURCE_DIR}/depsSource.cmake")
