@@ -105,6 +105,83 @@ std::vector<asio::ip::address> get_local_interfaces() {
 #error "..."
 #endif
 
+std::string GetPublicIP(const char* localIP) {
+    using asio::ip::tcp;
+    try {
+        asio::io_context io_context;
+        
+        // 解析目标服务器地址和端口
+        tcp::resolver resolver(io_context);
+        auto endpoints = resolver.resolve("api.ipify.org", "80");
+        
+        // 创建并打开套接字
+        tcp::socket socket(io_context);
+        
+        // 绑定套接字到特定的本地 IP 地址（网卡）
+        asio::ip::address local_address = asio::ip::make_address(localIP);
+        socket.open(tcp::v4());
+        socket.bind(tcp::endpoint(local_address, 0));
+        
+        // 连接到目标服务器
+        asio::connect(socket, endpoints);
+        
+        // 构建HTTP请求
+        std::string request = "GET / HTTP/1.1\r\n";
+        request += "Host: api.ipify.org\r\n";
+        request += "Connection: close\r\n\r\n";
+        
+        // 发送HTTP请求
+        asio::write(socket, asio::buffer(request));
+        
+        // 接收HTTP响应
+        asio::streambuf response;
+        asio::read_until(socket, response, "\r\n");
+        
+        // 检查响应状态行
+        std::istream response_stream(&response);
+        std::string http_version;
+        unsigned int status_code;
+        std::string status_message;
+        response_stream >> http_version >> status_code;
+        std::getline(response_stream, status_message);
+        
+        if (!response_stream || http_version.substr(0, 5) != "HTTP/") {
+            std::cout << "Invalid response\n";
+            return "";
+        }
+        
+        if (status_code != 200) {
+            std::cout << "Response returned with status code " << status_code << "\n";
+            return "";
+        }
+        
+        // 读取响应头
+        asio::read_until(socket, response, "\r\n\r\n");
+        
+        // 输出响应头
+        std::string header;
+        while (std::getline(response_stream, header) && header != "\r") {
+//            std::cout << header << "\n";
+        }
+        
+        // 读取响应体
+//        asio::error_code error;
+//        while (asio::read(socket, response, asio::transfer_at_least(1), error)) {
+////            std::cout << &response;
+//        }
+
+        const char* data = asio::buffer_cast<const char*>(response.data());
+        std::string result(data, response.size());
+        response.consume(response.size());
+        
+        return result;
+    } catch (std::exception& e) {
+        std::cerr << "Exception: " << e.what() << "\n";
+    }
+    
+    return "";
+}
+
 void PrintNetworkInfo(void) {
     std::vector<asio::ip::address> addressList = get_local_interfaces();
     std::sort(addressList.begin(), addressList.end(), [](auto& addressA, auto& addressB){
@@ -116,11 +193,16 @@ void PrintNetworkInfo(void) {
     
     for (auto& address : addressList) {
         std::cout << (address.is_v4() ? "ipv4: " : "ipv6: ") << address.to_string()
-            << ", loopback: " << std::boolalpha << address.is_loopback()
-            << ", unspecified: " << std::boolalpha << address.is_unspecified()
-            << ", multicast: " << std::boolalpha << address.is_multicast()
-            << std::endl;
+                    << ", loopback: " << std::boolalpha << address.is_loopback();
+//            << ", unspecified: " << std::boolalpha << address.is_unspecified()
+//            << ", multicast: " << std::boolalpha << address.is_multicast();
+        if (address.is_v4()) {
+            std::cout << ", public ip: " << GetPublicIP(address.to_string().c_str()) << std::endl;
+        } else {
+            std::cout << std::endl;
+        }
     }
+    
 }
 
 }
