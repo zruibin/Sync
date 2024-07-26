@@ -9,6 +9,7 @@
 #include "sync.h"
 #include <iostream>
 #include <filesystem>
+#include "log/logging.h"
 #include "node.hpp"
 #include "ignore/ignore.hpp"
 
@@ -34,10 +35,9 @@ void list_files_and_directories(const char *directory) {
     uint count = 0;
     
     std::string content = ignore::ReadFile(TESTDIR(/test/gitignore));
-    std::cout << "content: " << content << std::endl;
-    std::cout << "--------------------------------------------------------------"
-                << "--------------------------------------------------------------"
-                << std::endl;
+    Log(DEBUG) << "content: " << content;
+    Log(DEBUG) << "--------------------------------------------------------------"
+                << "--------------------------------------------------------------";
     
     ignore::GitignoreHelper helper = ignore::GitignoreHelper::Compile(content);
     for (const auto& entry : fs::recursive_directory_iterator(directory)) {
@@ -49,12 +49,12 @@ void list_files_and_directories(const char *directory) {
         
         ++count;
         if (fs::is_directory(entry.status())) {
-            std::cout << "目录: " << name << std::endl;
+            Log(DEBUG) << "目录: " << name;
         } else {
-            std::cout << "文件: " << name << std::endl;
+            Log(DEBUG) << "文件: " << name;
         }
     }
-    std::cout << "count: " << count << std::endl;
+    Log(DEBUG) << "count: " << count;
 }
 
 void WalkDirectory(const char *directory) {
@@ -65,16 +65,15 @@ void WalkDirectory(const char *directory) {
     list_files_and_directories(directory);
     
     
-    std::cout << "--------------------------------------------------------------"
-                << "--------------------------------------------------------------"
-                << std::endl;
+    Log(DEBUG) << "--------------------------------------------------------------"
+                << "--------------------------------------------------------------";
     
     fs::path dir_path("/Users/ruibin.chow/Desktop/test/tmp/aa");
     // 创建新目录
     if (fs::create_directories(dir_path)) {
-        std::cout << "Directory created successfully." << std::endl;
+        Log(DEBUG) << "Directory created successfully.";
     } else {
-        std::cout << "Directory already exists or cannot be created." << std::endl;
+        std::cout << "Directory already exists or cannot be created.";
     }
 }
 

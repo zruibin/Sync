@@ -149,21 +149,29 @@ link_directories(
 
 # modules
 include("${src_dir}/sync/CMakeLists.txt")
+include("${src_dir}/log/CMakeLists.txt")
+include("${src_dir}/platform/CMakeLists.txt")
+include("${src_dir}/util/CMakeLists.txt")
+# include("${src_dir}/foundation/CMakeLists.txt")
 
 # libs
 include("${libs_dir}/nlohmann/CMakeLists.txt")
 include("${libs_dir}/nlohmann_json_reflect/CMakeLists.txt")
 include("${libs_dir}/asio/CMakeLists.txt")
-include("${libs_dir}/websocketpp/CMakeLists.txt")
+# include("${libs_dir}/websocketpp/CMakeLists.txt")
 include("${libs_dir}/magic_enum/CMakeLists.txt")
 
 set(MODULES
     ${sync_all_file}
+    ${log_all_file}
+    ${platform_all_file}
+    ${util_all_file}
+    # ${foundation_all_file}
 )
 
 set(DEPENDS_LIBS
     ${asio_all_file}
-    ${websocketpp_all_file}
+    # ${websocketpp_all_file}
     ${nlohmann_json_all_file}
     ${nlohmann_json_reflect_all_file}
     ${magic_enum_all_file}
