@@ -63,7 +63,7 @@ void WalkDirectory(const char *directory) {
         return ;
     }
     
-    list_files_and_directories(directory);
+//    list_files_and_directories(directory);
     
     
     Log(DEBUG) << "--------------------------------------------------------------"
