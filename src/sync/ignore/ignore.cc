@@ -207,19 +207,19 @@ bool GitIgnore::ProcessDir(const std::string_view input,
                            const std::string_view re) const {
     bool match = false;
     if (re.compare(0, 1, "/") == 0 && re.compare(re.size()-1, 1, "/") == 0
-        && re.find("*") == std::string::npos) {
+        && re.find("*") == std::string_view::npos) {
         // /file/
         std::cout << "匹配: " << re << ", ";
     } else if (re.compare(0, 1, "/") == 0 && re.compare(re.size()-1, 1, "/") == 0
-               && re.find("*") != std::string::npos) {
+               && re.find("*") != std::string_view::npos) {
         // /.git/**/refs/
         std::cout << "匹配: " << re << ", ";
     } else if (re.compare(0, 1, "/") != 0 && re.compare(re.size()-1, 1, "/") == 0
-               && re.find("*") == std::string::npos) {
+               && re.find("*") == std::string_view::npos) {
         // file/
         std::cout << "匹配: " << re << ", ";
     } else if (re.compare(0, 1, "/") != 0 && re.compare(re.size()-1, 1, "/") == 0
-               && re.find("*") != std::string::npos) {
+               && re.find("*") != std::string_view::npos) {
         // .git/**/refs/
         std::cout << "匹配: " << re;
     }
@@ -229,25 +229,25 @@ bool GitIgnore::ProcessDir(const std::string_view input,
 bool GitIgnore::ProcessFile(const std::string_view input,
                             const std::string_view re) const {
     bool match = false;
-    if (re.find("/") == std::string::npos && re.find("*") == std::string::npos) {
+    if (re.find("/") == std::string::npos && re.find("*") == std::string_view::npos) {
         // .DS_Store
-    } else if (re.compare(0, 1, "/") == 0 && re.find("*") == std::string::npos) {
+    } else if (re.compare(0, 1, "/") == 0 && re.find("*") == std::string_view::npos) {
         // /file/start.sh
-    } else if (re.compare(0, 1, "/") != 0 && re.find("*") == std::string::npos) {
+    } else if (re.compare(0, 1, "/") != 0 && re.find("*") == std::string_view::npos) {
         // file/backup.py
-    } else if (re.find("/") == std::string::npos && re.find("*") != std::string::npos) {
+    } else if (re.find("/") == std::string::npos && re.find("*") != std::string_view::npos) {
         // *.swift
-    } else if (re.compare(0, 1, "/") == 0 && re.find("*") != std::string::npos
+    } else if (re.compare(0, 1, "/") == 0 && re.find("*") != std::string_view::npos
                && re.find("**") == std::string::npos) {
         // /logs/*.log,
-    } else if (re.compare(0, 1, "/") == 0 && re.find("*") != std::string::npos
-               && re.find("**") != std::string::npos) {
+    } else if (re.compare(0, 1, "/") == 0 && re.find("*") != std::string_view::npos
+               && re.find("**") != std::string_view::npos) {
         // /file/**/*.swift
-    } else if (re.compare(0, 1, "/") != 0 && re.find("*") != std::string::npos
-               && re.find("**") == std::string::npos) {
+    } else if (re.compare(0, 1, "/") != 0 && re.find("*") != std::string_view::npos
+               && re.find("**") == std::string_view::npos) {
         // src/*.swift
-    } else if (re.compare(0, 1, "/") != 0 && re.find("*") != std::string::npos
-               && re.find("**") != std::string::npos) {
+    } else if (re.compare(0, 1, "/") != 0 && re.find("*") != std::string_view::npos
+               && re.find("**") != std::string_view::npos) {
         // file/**/*.swift
     }
     
