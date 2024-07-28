@@ -28,15 +28,15 @@ std::string ReadFile(const char* filePath);
 //};
 
 struct GitIgnore {
-    void Compile(const std::string& content);
-    bool Accepts(const std::string& input) const;
-    bool Denies(const std::string& input) const;
+    void Compile(const std::string_view content);
+    bool Accepts(const std::string_view input) const;
+    bool Denies(const std::string_view input) const;
     
 private:
-    bool ProcessDir(const std::string& input,
-                    const std::string& regex) const;
-    bool ProcessFile(const std::string& input,
-                     const std::string& regex) const;
+    bool ProcessDir(const std::string_view input,
+                    const std::string_view regex) const;
+    bool ProcessFile(const std::string_view input,
+                     const std::string_view regex) const;
     
 private:
     std::vector<std::string> positiveFiles_;

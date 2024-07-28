@@ -137,9 +137,9 @@ std::string ReadFile(const char* filePath) {
 //}
 
 
-void GitIgnore::Compile(const std::string& content) {
+void GitIgnore::Compile(const std::string_view content) {
     std::vector<std::string> lines;
-    std::istringstream iss(content);
+    std::istringstream iss({std::string(content)});
     std::string line;
 
     while (std::getline(iss, line)) {
@@ -175,8 +175,8 @@ void GitIgnore::Compile(const std::string& content) {
     }
 }
     
-bool GitIgnore::Accepts(const std::string& input) const {
-    std::string tmp{ "/" + input };
+bool GitIgnore::Accepts(const std::string_view input) const {
+    std::string tmp{ "/" + std::string{input} };
     std::cout << "file: " << tmp;
     std::cout << " ";
     for (auto& re : negativeDirs_) {
@@ -199,12 +199,12 @@ bool GitIgnore::Accepts(const std::string& input) const {
     return false;
 }
     
-bool GitIgnore::Denies(const std::string& input) const {
+bool GitIgnore::Denies(const std::string_view input) const {
     return !this->Accepts(input);
 }
 
-bool GitIgnore::ProcessDir(const std::string& input,
-                           const std::string& re) const {
+bool GitIgnore::ProcessDir(const std::string_view input,
+                           const std::string_view re) const {
     bool match = false;
     if (re.compare(0, 1, "/") == 0 && re.compare(re.size()-1, 1, "/") == 0
         && re.find("*") == std::string::npos) {
@@ -226,8 +226,8 @@ bool GitIgnore::ProcessDir(const std::string& input,
     return match;
 }
 
-bool GitIgnore::ProcessFile(const std::string& input,
-                            const std::string& re) const {
+bool GitIgnore::ProcessFile(const std::string_view input,
+                            const std::string_view re) const {
     bool match = false;
     if (re.find("/") == std::string::npos && re.find("*") == std::string::npos) {
         // .DS_Store
