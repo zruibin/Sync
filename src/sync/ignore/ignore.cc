@@ -9,7 +9,6 @@
 #include "ignore.h"
 #include <filesystem>
 #include <iostream>
-#include <regex>
 #include <algorithm>
 #include <sstream>
 #include <fstream>
@@ -33,110 +32,11 @@ std::string ReadFile(const char* filePath) {
 }
 
 
-//std::string EscapeRegex(const std::string& pattern) {
-//    std::string escaped;
-//    for (char c : pattern) {
-//        if (std::string("-[]/{}()+?.\\^$|").find(c) != std::string::npos) {
-//            escaped += '\\';
-//        }
-//        escaped += c;
-//    }
-//    return escaped;
-//}
-//
-//std::string PrepareRegexPattern(const std::string& pattern) {
-//    std::string escaped = EscapeRegex(pattern);
-//    std::string regexPattern = std::regex_replace(escaped, std::regex("\\*\\*"), "(.+)");
-//    regexPattern = std::regex_replace(regexPattern, std::regex("\\*"), "([^\\/]+)");
-//    return regexPattern;
-//}
-//
-//std::string PreparePartialRegex(const std::string& pattern) {
-//    std::stringstream ss;
-//    std::istringstream iss(pattern);
-//    std::string item;
-//    bool first = true;
-//
-//    while (std::getline(iss, item, '/')) {
-//        if (!first) {
-//            ss << "([\\/]?(" << PrepareRegexPattern(item) << "\\b|$))";
-//        } else {
-//            ss << "(" << PrepareRegexPattern(item) << "\\b)";
-//            first = false;
-//        }
-//    }
-//
-//    return ss.str();
-//}
-//
-//std::pair<std::regex, std::regex> PrepareRegexes(const std::string& pattern) {
-//    return {
-//        std::regex("^(" + PrepareRegexPattern(pattern) + ")"),
-//        std::regex("^(" + PreparePartialRegex(pattern) + ")")
-//    };
-//}
-//
-//std::vector<std::vector<std::pair<std::regex, std::regex>>> Parse(const std::string& content) {
-//    std::vector<std::string> lines;
-//    std::istringstream iss(content);
-//    std::string line;
-//
-//    while (std::getline(iss, line)) {
-//        line = std::regex_replace(line, std::regex("^\\s+|\\s+$"), "");
-//        if (!line.empty() && line[0] != '#') {
-//            lines.push_back(line);
-//        }
-//    }
-//
-//    std::vector<std::string> positives, negatives;
-//    for (const auto& line : lines) {
-//        if (line[0] == '!') {
-//            negatives.push_back(line.substr(1));
-//        } else {
-//            positives.push_back(line);
-//        }
-//    }
-//
-//    auto prepareList = [](const std::vector<std::string>& list) {
-//        std::vector<std::pair<std::regex, std::regex>> regexes;
-//        for (const auto& pattern : list) {
-//            regexes.push_back(PrepareRegexes(pattern));
-//        }
-//        return regexes;
-//    };
-//
-//    return { prepareList(positives), prepareList(negatives) };
-//}
-//
-//GitignoreHelper GitignoreHelper::Compile(const std::string& content) {
-//    auto parsed = Parse(content);
-//    return { parsed[0], parsed[1] };
-//}
-//
-//bool GitignoreHelper::Accepts(const std::string& input) const {
-//    std::string path = input[0] == '/' ? input.substr(1) : input;
-//    return std::any_of(negatives.begin(), negatives.end(), [&path](const auto& regexPair) {
-//        return std::regex_match(path, regexPair.first);
-//    }) || !std::any_of(positives.begin(), positives.end(), [&path](const auto& regexPair) {
-//        return std::regex_match(path, regexPair.first);
-//    });
-//}
-//
-//bool GitignoreHelper::Denies(const std::string& input) const {
-//    std::string path = input[0] == '/' ? input.substr(1) : input;
-//    return !Accepts(path);
-//}
-//
-//bool GitignoreHelper::Maybe(const std::string& input) const {
-//    std::string path = input[0] == '/' ? input.substr(1) : input;
-//    return std::any_of(negatives.begin(), negatives.end(), [&path](const auto& regexPair) {
-//        return std::regex_match(path, regexPair.second);
-//    }) || !std::any_of(positives.begin(), positives.end(), [&path](const auto& regexPair) {
-//        return std::regex_match(path, regexPair.second);
-//    });
-//}
+#define DELIMITER "/"
+#define ASTERISK "*"
+#define DOUBLE_ASTERISK "**"
 
-bool StringStartWith(std::string_view originStr, std::string_view subStr) {
+bool StartWithString(std::string_view originStr, std::string_view subStr) {
     if (originStr.size() == 0 || subStr.size() == 0
         || originStr.size() < subStr.size()) {
         return false;
@@ -144,7 +44,7 @@ bool StringStartWith(std::string_view originStr, std::string_view subStr) {
     return originStr.substr(0, subStr.size()) == subStr;
 }
 
-bool StringEndWith(std::string_view originStr, std::string_view subStr) {
+bool EndWithString(std::string_view originStr, std::string_view subStr) {
     if (originStr.size() == 0 || subStr.size() == 0
         || originStr.size() < subStr.size()) {
         return false;
@@ -152,7 +52,7 @@ bool StringEndWith(std::string_view originStr, std::string_view subStr) {
     return originStr.substr(originStr.size() - subStr.size()) == subStr;
 }
 
-bool StringContainWith(std::string_view originStr, std::string_view subStr) {
+bool ContainWithString(std::string_view originStr, std::string_view subStr) {
     if (originStr.size() == 0 || subStr.size() == 0
         || originStr.size() < subStr.size()) {
         return false;
@@ -166,9 +66,9 @@ void GitIgnore::Compile(const std::string_view content) {
     std::string line;
 
     while (std::getline(iss, line)) {
-        line = std::regex_replace(line, std::regex("^\\s+|\\s+$"), "");
+        // line = std::regex_replace(line, std::regex("^\\s+|\\s+$"), "");
         if (!line.empty() && line[0] != '#') {
-            lines.push_back(line);
+            lines.emplace_back(line);
         }
     }
 
@@ -182,7 +82,7 @@ void GitIgnore::Compile(const std::string_view content) {
             isNegative = true;
             tmpStr = line.substr(1);
         }
-        if (StringEndWith(tmpStr, "/")) {
+        if (EndWithString(tmpStr, DELIMITER)) {
             if (isNegative) {
                 negativeDirs_.emplace_back(tmpStr);
             } else {
@@ -199,7 +99,7 @@ void GitIgnore::Compile(const std::string_view content) {
 }
     
 bool GitIgnore::Accepts(const std::string_view input) const {
-    std::string tmp{ "/" + std::string{input} };
+    std::string tmp{ DELIMITER + std::string{input} };
     std::cout << "file: " << tmp;
     std::cout << " ";
     for (auto& re : negativeDirs_) {
@@ -229,25 +129,25 @@ bool GitIgnore::Denies(const std::string_view input) const {
 bool GitIgnore::ProcessDir(const std::string_view input,
                            const std::string_view re) const {
     bool match = false;
-    if (StringStartWith(re, "/") && StringEndWith(re, "/")
-        && !StringContainWith(re, "*")) {
+    if (StartWithString(re, DELIMITER) && EndWithString(re, DELIMITER)
+        && !ContainWithString(re, ASTERISK)) {
         // /file/
-        if (StringStartWith(input, re)) {
+        if (StartWithString(input, re)) {
             match = true;
             std::cout << "匹配: " << re << ", ";
         }
-    } else if (!StringStartWith(re, "/") && StringEndWith(re, "/")
-               && !StringContainWith(re, "*")) {
+    } else if (!StartWithString(re, DELIMITER) && EndWithString(re, DELIMITER)
+               && !ContainWithString(re, ASTERISK)) {
         // file/
-        if (StringContainWith(input, re)) {
+        if (ContainWithString(input, re)) {
             match = true;
             std::cout << "匹配: " << re << ", ";
         }
-    } else if (StringStartWith(re, "/") && StringEndWith(re, "/")
-               && StringContainWith(re, "*")) {
+    } else if (StartWithString(re, DELIMITER) && EndWithString(re, DELIMITER)
+               && ContainWithString(re, ASTERISK)) {
         // /.git/**/refs/
-    } else if (!StringStartWith(re, "/") && StringEndWith(re, "/")
-               && StringContainWith(re, "*")) {
+    } else if (!StartWithString(re, DELIMITER) && EndWithString(re, DELIMITER)
+               && ContainWithString(re, ASTERISK)) {
         // .git/**/refs/
     }
     return match;
@@ -256,38 +156,38 @@ bool GitIgnore::ProcessDir(const std::string_view input,
 bool GitIgnore::ProcessFile(const std::string_view input,
                             const std::string_view re) const {
     bool match = false;
-    if (!StringContainWith(re, "/") && !StringContainWith(re, "*")) {
+    if (!ContainWithString(re, DELIMITER) && !ContainWithString(re, ASTERISK)) {
         // .DS_Store
-        if (StringEndWith(input, re)) {
+        if (EndWithString(input, re)) {
             match = true;
             std::cout << "匹配: " << re << ", ";
         }
-    } else if (StringStartWith(re, "/") && !StringContainWith(re, "*")) {
+    } else if (StartWithString(re, DELIMITER) && !ContainWithString(re, ASTERISK)) {
         // /file/start.sh
-        if (StringEndWith(input, re)) {
+        if (EndWithString(input, re)) {
             match = true;
             std::cout << "匹配: " << re << ", ";
         }
-    } else if (!StringStartWith(re, "/") && !StringContainWith(re, "*")) {
+    } else if (!StartWithString(re, DELIMITER) && !ContainWithString(re, ASTERISK)) {
         // file/backup.py
-        if (StringEndWith(input, re)) {
+        if (EndWithString(input, re)) {
             match = true;
             std::cout << "匹配: " << re << ", ";
         }
-    } else if (!StringContainWith(re, "/") && StringContainWith(re, "*")) {
+    } else if (!ContainWithString(re, DELIMITER) && ContainWithString(re, ASTERISK)) {
         // *.swift
         
-    } else if (StringStartWith(re, "/") && StringContainWith(re, "*")
-               && !StringContainWith(re, "**")) {
+    } else if (StartWithString(re, DELIMITER) && ContainWithString(re, ASTERISK)
+               && !ContainWithString(re, DOUBLE_ASTERISK)) {
         // /logs/*.log,
-    } else if (StringStartWith(re, "/") && StringContainWith(re, "*")
-               && StringContainWith(re, "**")) {
+    } else if (StartWithString(re, DELIMITER) && ContainWithString(re, ASTERISK)
+               && ContainWithString(re, DOUBLE_ASTERISK)) {
         // /file/**/*.swift
-    } else if (!StringStartWith(re, "/") && StringContainWith(re, "*")
-               && !StringContainWith(re, "**")) {
+    } else if (!StartWithString(re, DELIMITER) && ContainWithString(re, ASTERISK)
+               && !ContainWithString(re, DOUBLE_ASTERISK)) {
         // src/*.swift
-    } else if (!StringStartWith(re, "/") && StringContainWith(re, "**")
-               && StringContainWith(re, "**")) {
+    } else if (!StartWithString(re, DELIMITER) && ContainWithString(re, DOUBLE_ASTERISK)
+               && ContainWithString(re, DOUBLE_ASTERISK)) {
         // file/**/*.swift
     }
     
