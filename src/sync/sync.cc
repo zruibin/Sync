@@ -11,7 +11,7 @@
 #include <filesystem>
 #include "log/logging.h"
 #include "node.hpp"
-#include "ignore/ignore.hpp"
+#include "ignore/ignore.h"
 #include "connection/network/network.h"
 
 #define TESTDIR(path) PROJECT_DIR#path
@@ -40,19 +40,22 @@ void list_files_and_directories(const char *directory) {
     Log(DEBUG) << "--------------------------------------------------------------"
                 << "--------------------------------------------------------------";
     
-    ignore::GitignoreHelper helper = ignore::GitignoreHelper::Compile(content);
+    ignore::GitIgnore ignored;
+    ignored.Compile(content);
     for (const auto& entry : fs::recursive_directory_iterator(directory)) {
         std::string name = getName(entry.path(), directory);
         
-        if (!helper.Accepts(name)) {
-            continue;
-        }
+//        Log(DEBUG) << "result: " <<
+//        if (!helper.Accepts(name)) {
+//            continue;
+//        }
         
         ++count;
         if (fs::is_directory(entry.status())) {
-            Log(DEBUG) << "目录: " << name;
+//            Log(DEBUG) << "目录: " << name;
         } else {
-            Log(DEBUG) << "文件: " << name;
+            ignored.Accepts(name);
+//            Log(DEBUG) << "文件: " << name;
         }
     }
     Log(DEBUG) << "count: " << count;
@@ -63,21 +66,21 @@ void WalkDirectory(const char *directory) {
         return ;
     }
     
-//    list_files_and_directories(directory);
+    list_files_and_directories(directory);
     
     
     Log(DEBUG) << "--------------------------------------------------------------"
                 << "--------------------------------------------------------------";
     
-    connection::PrintNetworkInfo();
-    
-    fs::path dir_path("/Users/ruibin.chow/Desktop/test/tmp/aa");
-    // 创建新目录
-    if (fs::create_directories(dir_path)) {
-        Log(DEBUG) << "Directory created successfully.";
-    } else {
-        std::cout << "Directory already exists or cannot be created.";
-    }
+//    connection::PrintNetworkInfo();
+//    
+//    fs::path dir_path("/Users/ruibin.chow/Desktop/test/tmp/aa");
+//    // 创建新目录
+//    if (fs::create_directories(dir_path)) {
+//        Log(DEBUG) << "Directory created successfully.";
+//    } else {
+//        std::cout << "Directory already exists or cannot be created.";
+//    }
 }
 
 

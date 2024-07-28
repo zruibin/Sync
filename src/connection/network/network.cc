@@ -44,12 +44,13 @@ asio::ip::address_v6 sinaddr_to_asio(sockaddr_in6 *addr) {
     return asio::ip::make_address_v6(buf, addr->sin6_scope_id);
 }
 
-
+NetworkInfo parse_info_ipv4(
 #if defined(_WIN32)
-NetworkInfo parse_info_ipv4(AddrList addr) {
+AddrList addr
 #elif defined(__APPLE__) || defined(__linux__)
-NetworkInfo parse_info_ipv4(const ifaddrs *addr) {
+const ifaddrs *addr
 #endif
+) {
     uint32_t localAddr = reinterpret_cast<sockaddr_in *>(addr->ifa_addr)->sin_addr.s_addr;
     asio::ip::address local = asio::ip::make_address_v4(ntohl(localAddr));
     uint32_t maskAddr = reinterpret_cast<sockaddr_in *>(addr->ifa_netmask)->sin_addr.s_addr;
@@ -70,11 +71,13 @@ NetworkInfo parse_info_ipv4(const ifaddrs *addr) {
     return info;
 }
 
+NetworkInfo parse_info_ipv6(
 #if defined(_WIN32)
-NetworkInfo parse_info_ipv6(AddrList addr) {
+AddrList addr
 #elif defined(__APPLE__) || defined(__linux__)
-NetworkInfo parse_info_ipv6(const ifaddrs *addr) {
+const ifaddrs *addr
 #endif
+) {
     asio::ip::address local = sinaddr_to_asio(reinterpret_cast<sockaddr_in6 *>(addr->ifa_addr));
     NetworkInfo info;
     info.name = addr->ifa_name;

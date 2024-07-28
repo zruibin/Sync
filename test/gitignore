@@ -1,12 +1,121 @@
 # Xcode
 .DS_Store
+builddeps.py
+file/backup.py
+/file/start.sh
 
-!*.swift
-#.build/**
-arm64-apple-macosx/**
+*.swift
+*.log
+
+/logs/*.log
+/file/**/*.swift
+
+src/*.swift
+file/**/*.swift
 
 
-#CocoaPods
-#Pods
-.git/**
-.swiftpm/**
+.git/
+.svn/
+.git/**/refs/
+
+!file/
+!/file/
+!/.git/**/refs/
+!.git/**/refs/
+
+
+
+
+# .gitignore 文件用于告诉 Git 哪些文件或目录应该被忽略，不纳入版本控制。以下是 .gitignore 文件中可以使用的全部规则和语法：
+#
+# 1. 空行：空行会被忽略，可以用来增加文件的可读性。
+#
+# 2. 注释：以 `#` 开头的行是注释，会被忽略。
+#
+# ```
+# # 这是一个注释
+# ```
+#
+# 3. 通配符：
+#   * `*` 匹配零个或多个字符。
+#   * `?` 匹配单个字符。
+#   * `[abc]` 匹配方括号内的任意一个字符。
+#
+# ```
+# *.log       # 忽略所有 .log 文件
+# build/      # 忽略 build 目录及其所有内容
+# temp?       # 忽略 temp1, temp2, tempA 等文件
+# ```
+#
+# 4. 目录：以斜杠 `/` 结尾表示目录。
+#
+# ```
+# logs/       # 忽略 logs 目录及其所有内容
+# ```
+#
+# 5. 否定规则：以` ! `开头的模式表示例外规则，即不忽略匹配的文件或目录。
+#
+# ```
+# *.log       # 忽略所有 .log 文件
+# !important.log  # 但不忽略 important.log
+# ```
+#
+# 6. 斜杠` /`：
+#
+#   * 开头的 / 表示相对于仓库根目录。
+#   * 结尾的 / 表示目录。
+# ```
+# /config/    # 仅忽略仓库根目录下的 config 目录
+# config/     # 忽略所有名为 config 的目录
+# ```
+#
+# 7. 双星号 `**`：
+#
+#  * `**` 匹配任意数量的目录。
+#
+# ```
+# **/logs     # 忽略所有 logs 目录
+# logs/**     # 忽略 logs 目录及其所有子目录和文件
+# ```
+#
+# 8. 转义字符：使用反斜杠 \ 转义特殊字符。
+#
+# ```
+# \#file      # 忽略名为 #file 的文件
+# ```
+#
+# 9. 组合规则：可以组合使用上述规则来实现复杂的忽略模式。
+#
+# ```
+# # 忽略所有 .log 文件，但不忽略 logs 目录中的 .log 文件
+# *.log
+# !logs/*.log
+# ```
+#
+# 以下是一个示例 `.gitignore` 文件：
+#
+# ```
+# # 忽略所有 .log 文件
+# *.log
+#
+# # 忽略所有 .tmp 文件
+# *.tmp
+#
+# # 忽略 build 目录及其所有内容
+# build/
+#
+# # 忽略所有名为 temp 的目录
+# temp/
+#
+# # 忽略所有 logs 目录，但不忽略 logs 目录中的 .log 文件
+# logs/
+# !logs/*.log
+#
+# # 忽略所有 .DS_Store 文件（常见于 macOS）
+# .DS_Store
+#
+# # 忽略所有 node_modules 目录
+# node_modules/
+# ```
+#
+# 通过合理使用 .gitignore 文件，可以有效地管理哪些文件和目录应该被版本控制系统忽略，从而保持代码仓库的整洁和高效。
