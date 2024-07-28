@@ -136,6 +136,29 @@ std::string ReadFile(const char* filePath) {
 //    });
 //}
 
+bool StringStartWith(std::string_view originStr, std::string_view subStr) {
+    if (originStr.size() == 0 || subStr.size() == 0
+        || originStr.size() < subStr.size()) {
+        return false;
+    }
+    return originStr.substr(0, subStr.size()) == subStr;
+}
+
+bool StringEndWith(std::string_view originStr, std::string_view subStr) {
+    if (originStr.size() == 0 || subStr.size() == 0
+        || originStr.size() < subStr.size()) {
+        return false;
+    }
+    return originStr.substr(originStr.size() - subStr.size()) == subStr;
+}
+
+bool StringContainWith(std::string_view originStr, std::string_view subStr) {
+    if (originStr.size() == 0 || subStr.size() == 0
+        || originStr.size() < subStr.size()) {
+        return false;
+    }
+    return originStr.find(subStr) != std::string_view::npos;
+}
 
 void GitIgnore::Compile(const std::string_view content) {
     std::vector<std::string> lines;
@@ -159,7 +182,7 @@ void GitIgnore::Compile(const std::string_view content) {
             isNegative = true;
             tmpStr = line.substr(1);
         }
-        if (tmpStr.compare(tmpStr.size()-1, 1, "/") == 0) {
+        if (StringEndWith(tmpStr, "/")) {
             if (isNegative) {
                 negativeDirs_.emplace_back(tmpStr);
             } else {
@@ -181,18 +204,18 @@ bool GitIgnore::Accepts(const std::string_view input) const {
     std::cout << " ";
     for (auto& re : negativeDirs_) {
 //        std::cout << "!";
-//        this->ProcessDir(input, re);
+        this->ProcessDir(tmp, re);
     }
 //    for (auto& re : negativeFiles_) {
 //        std::cout << ", !匹配: " << re;
 //    }
     
     for (auto& re : positiveDirs_) {
-//        this->ProcessDir(input, re);
+        this->ProcessDir(tmp, re);
     }
     for (auto& re : positiveFiles_) {
 //        std::cout << ", 匹配: " << re;
-        this->ProcessFile(input, re);
+        this->ProcessFile(tmp, re);
     }
 
     std::cout  << std::endl;
@@ -206,22 +229,26 @@ bool GitIgnore::Denies(const std::string_view input) const {
 bool GitIgnore::ProcessDir(const std::string_view input,
                            const std::string_view re) const {
     bool match = false;
-    if (re.compare(0, 1, "/") == 0 && re.compare(re.size()-1, 1, "/") == 0
-        && re.find("*") == std::string_view::npos) {
+    if (StringStartWith(re, "/") && StringEndWith(re, "/")
+        && !StringContainWith(re, "*")) {
         // /file/
-        std::cout << "匹配: " << re << ", ";
-    } else if (re.compare(0, 1, "/") == 0 && re.compare(re.size()-1, 1, "/") == 0
-               && re.find("*") != std::string_view::npos) {
-        // /.git/**/refs/
-        std::cout << "匹配: " << re << ", ";
-    } else if (re.compare(0, 1, "/") != 0 && re.compare(re.size()-1, 1, "/") == 0
-               && re.find("*") == std::string_view::npos) {
+        if (StringStartWith(input, re)) {
+            match = true;
+            std::cout << "匹配: " << re << ", ";
+        }
+    } else if (!StringStartWith(re, "/") && StringEndWith(re, "/")
+               && !StringContainWith(re, "*")) {
         // file/
-        std::cout << "匹配: " << re << ", ";
-    } else if (re.compare(0, 1, "/") != 0 && re.compare(re.size()-1, 1, "/") == 0
-               && re.find("*") != std::string_view::npos) {
+        if (StringContainWith(input, re)) {
+            match = true;
+            std::cout << "匹配: " << re << ", ";
+        }
+    } else if (StringStartWith(re, "/") && StringEndWith(re, "/")
+               && StringContainWith(re, "*")) {
+        // /.git/**/refs/
+    } else if (!StringStartWith(re, "/") && StringEndWith(re, "/")
+               && StringContainWith(re, "*")) {
         // .git/**/refs/
-        std::cout << "匹配: " << re;
     }
     return match;
 }
@@ -229,25 +256,38 @@ bool GitIgnore::ProcessDir(const std::string_view input,
 bool GitIgnore::ProcessFile(const std::string_view input,
                             const std::string_view re) const {
     bool match = false;
-    if (re.find("/") == std::string::npos && re.find("*") == std::string_view::npos) {
+    if (!StringContainWith(re, "/") && !StringContainWith(re, "*")) {
         // .DS_Store
-    } else if (re.compare(0, 1, "/") == 0 && re.find("*") == std::string_view::npos) {
+        if (StringEndWith(input, re)) {
+            match = true;
+            std::cout << "匹配: " << re << ", ";
+        }
+    } else if (StringStartWith(re, "/") && !StringContainWith(re, "*")) {
         // /file/start.sh
-    } else if (re.compare(0, 1, "/") != 0 && re.find("*") == std::string_view::npos) {
+        if (StringEndWith(input, re)) {
+            match = true;
+            std::cout << "匹配: " << re << ", ";
+        }
+    } else if (!StringStartWith(re, "/") && !StringContainWith(re, "*")) {
         // file/backup.py
-    } else if (re.find("/") == std::string::npos && re.find("*") != std::string_view::npos) {
+        if (StringEndWith(input, re)) {
+            match = true;
+            std::cout << "匹配: " << re << ", ";
+        }
+    } else if (!StringContainWith(re, "/") && StringContainWith(re, "*")) {
         // *.swift
-    } else if (re.compare(0, 1, "/") == 0 && re.find("*") != std::string_view::npos
-               && re.find("**") == std::string::npos) {
+        
+    } else if (StringStartWith(re, "/") && StringContainWith(re, "*")
+               && !StringContainWith(re, "**")) {
         // /logs/*.log,
-    } else if (re.compare(0, 1, "/") == 0 && re.find("*") != std::string_view::npos
-               && re.find("**") != std::string_view::npos) {
+    } else if (StringStartWith(re, "/") && StringContainWith(re, "*")
+               && StringContainWith(re, "**")) {
         // /file/**/*.swift
-    } else if (re.compare(0, 1, "/") != 0 && re.find("*") != std::string_view::npos
-               && re.find("**") == std::string_view::npos) {
+    } else if (!StringStartWith(re, "/") && StringContainWith(re, "*")
+               && !StringContainWith(re, "**")) {
         // src/*.swift
-    } else if (re.compare(0, 1, "/") != 0 && re.find("*") != std::string_view::npos
-               && re.find("**") != std::string_view::npos) {
+    } else if (!StringStartWith(re, "/") && StringContainWith(re, "**")
+               && StringContainWith(re, "**")) {
         // file/**/*.swift
     }
     

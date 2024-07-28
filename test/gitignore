@@ -1,10 +1,10 @@
 # Xcode
 .DS_Store
-builddeps.py
+backup.py
 file/backup.py
 /file/start.sh
 
-*.swift
+*.md
 *.log
 
 /logs/*.log
