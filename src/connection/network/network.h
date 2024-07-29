@@ -25,6 +25,8 @@ struct NetworkInfo {
     bool is_loopback() const { return is_loopback_; };
     
     std::string name;
+    std::string mac;
+    uint16_t mtu;
     
     std::string local;
     uint32_t localAddr;

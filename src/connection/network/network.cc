@@ -26,10 +26,16 @@ typedef IP_ADAPTER_ADDRESSES *AddrList;
 
 #elif defined(__APPLE__) || defined(__linux__)
 
+#include <unistd.h>
 #include <arpa/inet.h>
 #include <ifaddrs.h>
 #include <net/if.h>
 #include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <netinet/in.h>
+#include <net/if.h>
+#include <net/if_dl.h>
 
 #endif
 
@@ -43,6 +49,49 @@ asio::ip::address_v6 sinaddr_to_asio(sockaddr_in6 *addr) {
     memcpy(buf.data(), addr->sin6_addr.s6_addr, sizeof(addr->sin6_addr));
     return asio::ip::make_address_v6(buf, addr->sin6_scope_id);
 }
+
+#if defined(__APPLE__) || defined(__linux__)
+uint16_t get_mtu(const char *interface) {
+    int fd;
+    struct ifreq ifr;
+ 
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+
+    strncpy(ifr.ifr_name, interface, IFNAMSIZ-1);
+    if (ioctl(fd, SIOCGIFMTU, &ifr)) {
+        perror("ioctl");
+        return -1;
+    }
+    close(fd);
+    return ifr.ifr_mtu;
+}
+
+std::string get_mac_address(const char* interface) {
+    ifaddrs *ifs;
+    if (getifaddrs(&ifs)) {
+        return "";
+    }
+    char format_str[20] = { 0 };
+    for (auto addr = ifs; addr != nullptr; addr = addr->ifa_next) {
+        if (addr->ifa_addr == nullptr) continue;
+        if (!(addr->ifa_flags & IFF_UP)) continue;
+
+        if (addr->ifa_addr->sa_family == AF_LINK &&
+            strcmp(addr->ifa_name, interface) == 0) {
+            struct sockaddr_dl* sdl = (struct sockaddr_dl*)addr->ifa_addr;
+            unsigned char* mac = (unsigned char*)LLADDR(sdl);
+//            printf("MAC Address: %02x:%02x:%02x:%02x:%02x:%02x\n",
+//                               mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+            snprintf(format_str,
+                     sizeof(format_str) - 1,
+                     "%02x:%02x:%02x:%02x:%02x:%02x",
+                     mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+        }
+    }
+    freeifaddrs(ifs);
+    return format_str;
+}
+#endif
 
 NetworkInfo parse_info_ipv4(
 #if defined(_WIN32)
@@ -68,6 +117,12 @@ const ifaddrs *addr
     info.broadcastAddr = broadcastAddr;
     info.is_loopback_ = local.is_loopback();
     info.type = NetworkInfo::Type::IPV4;
+
+#if defined(__APPLE__) || defined(__linux__)
+    info.mtu = get_mtu(addr->ifa_name);
+    info.mac = get_mac_address(addr->ifa_name);
+#endif
+    
     return info;
 }
 
@@ -204,6 +259,8 @@ void PrintNetworkInfo(void) {
         std::cout << ", loopback: " << std::boolalpha << network.is_loopback();
         if (network.is_v4()) {
 //            std::cout << ", public ip: " << GetPublicIP(network.local.c_str());
+            std::cout << ", mac: " << network.mac;
+            std::cout << ", mtu: " << network.mtu;
         }
         std::cout << std::endl;
     }

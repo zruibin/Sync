@@ -72,7 +72,7 @@ void WalkDirectory(const char *directory) {
     Log(DEBUG) << "--------------------------------------------------------------"
                 << "--------------------------------------------------------------";
     
-//    connection::PrintNetworkInfo();
+    connection::PrintNetworkInfo();
 //    
 //    fs::path dir_path("/Users/ruibin.chow/Desktop/test/tmp/aa");
 //    // 创建新目录
