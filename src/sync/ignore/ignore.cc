@@ -15,7 +15,7 @@
 
 /**
  https://blog.csdn.net/yimeng_Sama/article/details/140797720
- 未实现：?通配符、[abc]模式、[abc]模式、{string1,string2,...}模、\字符
+ 未实现：?通配符、[abc]模式、[^abc]模式、{string1,string2,...}模、\字符
  */
 
 namespace ignore {
