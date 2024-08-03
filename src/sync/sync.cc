@@ -18,11 +18,11 @@
 
 namespace fs = std::filesystem;
 
-bool is_directory(const std::string& path) {
+bool IsDirectory(const std::string& path) {
     return fs::exists(path) && fs::is_directory(path);
 }
 
-std::string getName(const fs::path& path, const char* home) {
+std::string GetNameByPath(const fs::path& path, const char* home) {
     std::string filePath = path.string();
     std::string releativePath = path.relative_path();
     
@@ -32,31 +32,41 @@ std::string getName(const fs::path& path, const char* home) {
     return name;
 }
 
-void list_files_and_directories(const char *directory) {
-    uint count = 0;
-    
-    std::string content = ignore::ReadFile(TESTDIR(/test/gitignore));
+std::optional<NodeList> RecursiveDirectory(const char *directory) {
+    if (!fs::exists(directory)) {
+        return std::nullopt;
+    }
+//    std::string content = ignore::ReadFile(TESTDIR(/test/gitignore));
 //    Log(DEBUG) << "content: " << content;
-    Log(DEBUG) << "--------------------------------------------------------------"
-                << "--------------------------------------------------------------";
+//    ignore::GitIgnore ignored;
+//    ignored.Compile(content);
     
-    ignore::GitIgnore ignored;
-    ignored.Compile(content);
+    std::vector<Node> nodes;
     for (const auto& entry : fs::recursive_directory_iterator(directory)) {
-        std::string name = getName(entry.path(), directory);
+        const auto& path = entry.path();
+        std::string name = GetNameByPath(entry.path(), directory);
         
-        
+        Node node;
+        node.name = name;
         if (fs::is_directory(entry.status())) {
 //            Log(DEBUG) << "目录: " << name;
-        } else {
+            node.type = NodeType::Directory;
+        } else if (fs::exists(path) && fs::is_regular_file(path)) {
 //            Log(DEBUG) << "文件: " << name;
-            if (ignored.Accepts(name)) {
-                Log(DEBUG) << "name: " << name;
-                ++count;
-            }
+            node.type = NodeType::File;
+            node.size = fs::file_size(path);
+//            if (ignored.Accepts(name)) {
+//                Log(DEBUG) << "name: " << name;
+//                ++count;
+//            }
         }
+        nodes.emplace_back(node);
     }
-    Log(DEBUG) << "count: " << count;
+    NodeList nodeInfo;
+    nodeInfo.nodes = nodes;
+
+    Log(DEBUG) << "Json: " << nodeInfo.ToJsonString();
+    return nodeInfo;
 }
 
 void WalkDirectory(const char *directory) {
@@ -64,7 +74,7 @@ void WalkDirectory(const char *directory) {
         return ;
     }
     
-    list_files_and_directories(directory);
+    RecursiveDirectory(directory);
     
     
     Log(DEBUG) << "--------------------------------------------------------------"

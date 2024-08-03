@@ -16,16 +16,6 @@ namespace ignore {
 
 std::string ReadFile(const char* filePath);
 
-//struct GitignoreHelper {
-//    std::vector<std::pair<std::regex, std::regex>> positives;
-//    std::vector<std::pair<std::regex, std::regex>> negatives;
-//    
-//    static GitignoreHelper Compile(const std::string& content);
-//    
-//    bool Accepts(const std::string& input) const;
-//    bool Denies(const std::string& input) const;
-//    bool Maybe(const std::string& input) const;
-//};
 
 struct GitIgnore {
     void Compile(const std::string_view content);

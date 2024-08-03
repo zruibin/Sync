@@ -23,7 +23,8 @@ struct Node {
     std::optional<NodeType> type;
     std::optional<std::string> name;
     std::optional<std::string> hash;
-    FIELDS_REFLECT(Node, type, name, hash);
+    std::optional<u_int32_t> size; // 字节(Byte)
+    FIELDS_REFLECT(Node, type, name, hash, size);
 };
 
 struct NodeList : Jsonable<NodeList> {

@@ -70,7 +70,7 @@ struct Jsonable {
         T* value = static_cast<T *>(this);
         jString jsonStr{ jsonString };
         for (auto& [k, v] : GetReplaceMap()) {
-            jsonStr = replace(jsonStr, v, k);
+            jsonStr = Replace(jsonStr, v, k);
         }
         *value = jreflect::from_json<T>(jsonStr);
     }
