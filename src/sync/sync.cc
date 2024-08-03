@@ -36,7 +36,7 @@ void list_files_and_directories(const char *directory) {
     uint count = 0;
     
     std::string content = ignore::ReadFile(TESTDIR(/test/gitignore));
-    Log(DEBUG) << "content: " << content;
+//    Log(DEBUG) << "content: " << content;
     Log(DEBUG) << "--------------------------------------------------------------"
                 << "--------------------------------------------------------------";
     
@@ -45,17 +45,15 @@ void list_files_and_directories(const char *directory) {
     for (const auto& entry : fs::recursive_directory_iterator(directory)) {
         std::string name = getName(entry.path(), directory);
         
-//        Log(DEBUG) << "result: " <<
-//        if (!helper.Accepts(name)) {
-//            continue;
-//        }
         
-        ++count;
         if (fs::is_directory(entry.status())) {
 //            Log(DEBUG) << "目录: " << name;
         } else {
-            ignored.Accepts(name);
 //            Log(DEBUG) << "文件: " << name;
+            if (ignored.Accepts(name)) {
+                Log(DEBUG) << "name: " << name;
+                ++count;
+            }
         }
     }
     Log(DEBUG) << "count: " << count;
@@ -72,7 +70,7 @@ void WalkDirectory(const char *directory) {
     Log(DEBUG) << "--------------------------------------------------------------"
                 << "--------------------------------------------------------------";
     
-    connection::PrintNetworkInfo();
+//    connection::PrintNetworkInfo();
 //    
 //    fs::path dir_path("/Users/ruibin.chow/Desktop/test/tmp/aa");
 //    // 创建新目录
