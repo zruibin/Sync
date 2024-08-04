@@ -10,7 +10,7 @@
 #include <iostream>
 #include <filesystem>
 #include "log/logging.h"
-#include "node.hpp"
+#include "node.h"
 #include "ignore/ignore.h"
 #include "connection/network/network.h"
 
@@ -55,9 +55,9 @@ std::optional<NodeList> RecursiveDirectory(const char *directory) {
 //            Log(DEBUG) << "文件: " << name;
             node.type = NodeType::File;
             node.size = fs::file_size(path);
+            node.hash = GetFileHash(path);
 //            if (ignored.Accepts(name)) {
 //                Log(DEBUG) << "name: " << name;
-//                ++count;
 //            }
         }
         nodes.emplace_back(node);

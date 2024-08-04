@@ -1,9 +1,7 @@
 
-message("nlohmann json version was 3.10.5")
+message("MD5")
 
-set(nlohmann_json_name nlohmann_json)
+set(md5_name md5)
 
-file(GLOB_RECURSE nlohmann_json_all_file "${libs_dir}/nlohmann/*")
-sourceGroup("" ${nlohmann_json_all_file})
-
-message("warning: 为啥.hpp的无法生成单独的库？")
+file(GLOB_RECURSE md5_all_file "${libs_dir}/md5/*")
+sourceGroup("" ${md5_all_file})

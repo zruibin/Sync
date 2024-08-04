@@ -161,6 +161,7 @@ include("${libs_dir}/nlohmann_json_reflect/CMakeLists.txt")
 include("${libs_dir}/asio/CMakeLists.txt")
 # include("${libs_dir}/websocketpp/CMakeLists.txt")
 include("${libs_dir}/magic_enum/CMakeLists.txt")
+include("${libs_dir}/md5/CMakeLists.txt")
 
 set(MODULES
     ${sync_all_file}
@@ -177,6 +178,7 @@ set(DEPENDS_LIBS
     ${nlohmann_json_all_file}
     ${nlohmann_json_reflect_all_file}
     ${magic_enum_all_file}
+    ${md5_all_file}
 )
 
 list(APPEND ALL_SOURCES ${MODULES} ${DEPENDS_LIBS})

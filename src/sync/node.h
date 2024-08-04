@@ -11,6 +11,7 @@
 #include <vector>
 #include <string>
 #include <optional>
+#include <filesystem>
 #include "jsonable.hpp"
 
 enum class NodeType {
@@ -31,5 +32,7 @@ struct NodeList : Jsonable<NodeList> {
     std::optional<std::vector<Node>> nodes;
     FIELDS_REFLECT(NodeList, nodes);
 };
+
+std::string GetFileHash(const std::filesystem::path& path);
 
 #endif /* !NODE_HPP */
