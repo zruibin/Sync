@@ -26,7 +26,7 @@ struct Node {
     std::optional<NodeType> type;
     std::optional<std::string> name;
     std::optional<std::string> hash;
-    std::optional<u_int32_t> size; // 字节(Byte)
+    std::optional<size_t> size; // 字节(Byte)
     FIELDS_REFLECT(Node, type, name, hash, size);
 };
 
@@ -48,7 +48,8 @@ struct NodeAction {
     Node slaveNode;
 };
 
-std::string GetFileHash(const std::filesystem::path& path);
+std::string GetFileHash(const char* path);
+std::string GetFileSmartHash(const char* path);
 
 bool IsDirectory(const std::string& path);
 

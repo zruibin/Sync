@@ -15,8 +15,8 @@ namespace node {
 
 namespace fs = std::filesystem;
 
-std::string GetFileHash(const std::filesystem::path& path) {
-    std::ifstream in(path.string().c_str(), std::ios::binary);
+std::string GetFileHash(const char* path) {
+    std::ifstream in(path, std::ios::binary);
     if (!in) {
         return "";
     }
@@ -30,6 +30,54 @@ std::string GetFileHash(const std::filesystem::path& path) {
             md5.update(buffer, length);
         }
     }
+    in.close();
+    return md5.toString();
+}
+
+std::string GetFileSmartHash(const char* path) {
+    std::ifstream in(path, std::ios::binary | std::ios::ate);
+    if (!in) {
+        return "";
+    }
+    security::MD5 md5;
+    
+    size_t thresholdSize = 1024 * 4 * 10;
+    size_t size = fs::file_size(path); // 获取文件大小
+    std::streamsize length;
+    if (size <= thresholdSize) {
+        char buffer[1024];
+        while (!in.eof()) {
+            in.read(buffer, 1024);
+            length = in.gcount();
+            if (length > 0) {
+                md5.update(buffer, length);
+            }
+        }
+    } else {
+        char buffer[thresholdSize];
+        
+        in.seekg(0, std::ios::beg);
+        in.read(buffer, thresholdSize);
+        length = in.gcount();
+        if (length > 0) {
+            md5.update(buffer, length);
+        }
+        
+        in.seekg((size - thresholdSize) / 2, std::ios::end);
+        in.read(buffer, thresholdSize);
+        length = in.gcount();
+        if (length > 0) {
+            md5.update(buffer, length);
+        }
+        
+        in.seekg(-thresholdSize, std::ios::end);
+        in.read(buffer, thresholdSize);
+        length = in.gcount();
+        if (length > 0) {
+            md5.update(buffer, length);
+        }
+    }
+    
     in.close();
     return md5.toString();
 }
@@ -71,7 +119,7 @@ std::optional<NodeList> RecursiveDirectory(const char *directory) {
         } else if (fs::exists(path) && fs::is_regular_file(path)) {
             node.type = NodeType::File;
             node.size = fs::file_size(path);
-            node.hash = GetFileHash(path);
+            node.hash = GetFileHash(name.c_str());
         }
         nodes.emplace_back(node);
     }
