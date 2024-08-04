@@ -158,7 +158,7 @@ bool GitIgnore::Accepts(const std::string_view input) const {
     }
     if (match) return false;
     
-    return false;
+    return true;
 }
     
 bool GitIgnore::Denies(const std::string_view input) const {
