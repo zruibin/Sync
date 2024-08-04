@@ -5,14 +5,16 @@
  * Copyright (c) 2024年 Ruibin.Chow All rights reserved.
  */
 
-#ifndef NODE_HPP
-#define NODE_HPP
+#ifndef NODE_H
+#define NODE_H
 
 #include <vector>
 #include <string>
 #include <optional>
 #include <filesystem>
 #include "jsonable.hpp"
+
+namespace node {
 
 enum class NodeType {
     Unknow,
@@ -33,6 +35,31 @@ struct NodeList : Jsonable<NodeList> {
     FIELDS_REFLECT(NodeList, nodes);
 };
 
+struct NodeAction {
+    enum Type {
+        Unknow,
+        Add,
+        Delete,
+        Move,
+        Modify,
+    };
+    Type type;
+    Node mainNode;
+    Node slaveNode;
+};
+
 std::string GetFileHash(const std::filesystem::path& path);
 
-#endif /* !NODE_HPP */
+bool IsDirectory(const std::string& path);
+
+std::string GetNameByPath(const std::filesystem::path& path, const char* home);
+
+std::optional<NodeList> RecursiveDirectory(const char *directory);
+
+std::optional<std::vector<NodeAction>>
+GetNodeDiffs(const std::vector<Node>& main,
+             const std::vector<Node>& slave);
+
+}
+
+#endif /* !NODE_H */
