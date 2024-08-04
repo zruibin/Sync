@@ -12,7 +12,7 @@
 #include <string>
 #include <optional>
 #include <filesystem>
-#include "jsonable.hpp"
+#include <nlohmann_json_reflect/jsonable.hpp>
 
 namespace node {
 
