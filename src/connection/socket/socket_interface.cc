@@ -10,6 +10,8 @@
 
 namespace connection {
 
+namespace socket {
+
 const int kConnnectTotalTimeout = 60 * 1000;
 const int kConnnectTimeout = 10 * 1000;
 const int kConnnectShortTimeout = 5 * 1000;
@@ -68,4 +70,6 @@ const char* ISocket::ErrorToString(Error error) {
     }
 }
 
-}
+} // namespace socket
+
+} // namespace connection

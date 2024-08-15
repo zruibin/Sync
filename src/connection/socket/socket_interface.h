@@ -14,8 +14,10 @@
 
 namespace connection {
 
-class ISocket {
+namespace socket {
 
+class ISocket {
+    
 public:
     enum class Protocol {
         kUnknow = 0,
@@ -50,10 +52,10 @@ public:
     static const char* StateToString(State state);
     static const char* ErrorToString(Error error);
     
-    using ConnectStateChangedHandler = std::function<void(bool connected,
-                                                          Protocol protocol,
-                                                          const std::string& networkName,
-                                                          int networkType)> ;
+    using StateChangedHandler = std::function<void(bool connected,
+                                                   Protocol protocol,
+                                                   const std::string& networkName,
+                                                   int networkType)>;
     using FailedHandler = std::function<void(Error error,
                                              const std::string& reason)>;
     using ReceivedFrameHandler = std::function<void(const char* buf,
@@ -67,12 +69,19 @@ public:
     ISocket(const ISocket&) = delete;
     ISocket& operator=(const ISocket&) = delete;
     
-    virtual void SetConnectStateChangedHandler(ConnectStateChangedHandler connectStateChangedHandler) {}
-    virtual void SetFailedHandler(FailedHandler failedHandler) {}
-    virtual void SetReceivedFrameHandler(ReceivedFrameHandler receivedFrameHandler) {}
+    virtual void SetStateChangedHandler(StateChangedHandler stateChangedHandler) {
+        stateChangedHandler = stateChangedHandler_;
+    }
+    virtual void SetFailedHandler(FailedHandler failedHandler) {
+        failedHandler = failedHandler_;
+    }
+    virtual void SetReceivedFrameHandler(ReceivedFrameHandler receivedFrameHandler) {
+        receivedFrameHandler = receivedFrameHandler_;
+    }
     
-    virtual void SetConnectTimeout(int timeout) = 0;
+    virtual void SetConnectTimeout(uint32_t timeout) = 0;
     virtual void UseEncrypt(bool encrypt) = 0;
+    virtual void Bind(const char* ip, uint32_t port) = 0;
     virtual void Open() = 0;
     virtual void Close() = 0;
     virtual void Send(const std::string& payload) = 0;
@@ -80,9 +89,15 @@ public:
     virtual State GetState() = 0;
     virtual Error GetError() = 0;
     virtual bool IsConnected() = 0;
-    virtual void SetProtocol(Protocol protocol) = 0;
     virtual Protocol GetProtocol() const = 0;
+    
+private:
+    StateChangedHandler stateChangedHandler_{ nullptr };
+    FailedHandler failedHandler_{ nullptr };
+    ReceivedFrameHandler receivedFrameHandler_{ nullptr };
 };
+
+} // namespace socket
 
 } // namespace connection
 
