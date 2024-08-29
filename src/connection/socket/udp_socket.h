@@ -9,19 +9,22 @@
 #define UDP_SOCKET_H
 
 #include "socket_interface.h"
+#include <asio/asio.hpp>
 
 namespace connection {
 
 namespace socket {
 
+using namespace asio::ip;
+
 class UDPSocket: public ISocket {
     
 public:
-    void Bind(const char* ip, uint32_t port) override;
-    void Open() override;
+    void Open(const char* ip, uint32_t port) override;
+    void Connect(const char* ip, uint32_t port) override;
     void Close() override;
     void Send(const std::string& payload) override;
-    void Send(const uint8_t* buf, int len, FrameType frameType) override;
+    void Send(const uint8_t* buf, std::size_t len, FrameType frameType) override;
     
     bool IsConnected() override { return state_ == State::kConnected; }
     void SetConnectTimeout(uint32_t timeout) override { timeout_ = timeout; }
@@ -33,10 +36,15 @@ public:
 private:
     uint32_t timeout_;
     bool encrypt_;
-    const char* ip_;
-    uint32_t port_;
     State state_;
     Error error_;
+    
+private:
+    asio::io_service io_service_;
+    udp::socket socket_{io_service_};
+    udp::endpoint remotePoint_;
+    enum { max_length = 4096 }; //长度需要关注
+    char data_[max_length];
 };
 
 } // namespace socket

@@ -59,7 +59,7 @@ public:
     using FailedHandler = std::function<void(Error error,
                                              const std::string& reason)>;
     using ReceivedFrameHandler = std::function<void(const char* buf,
-                                                    int len,
+                                                    std::size_t len,
                                                     FrameType frameType)>;
     
 public:
@@ -81,17 +81,17 @@ public:
     
     virtual void SetConnectTimeout(uint32_t timeout) = 0;
     virtual void UseEncrypt(bool encrypt) = 0;
-    virtual void Bind(const char* ip, uint32_t port) = 0;
-    virtual void Open() = 0;
+    virtual void Open(const char* ip, uint32_t port) = 0;
+    virtual void Connect(const char* ip, uint32_t port) = 0;
     virtual void Close() = 0;
     virtual void Send(const std::string& payload) = 0;
-    virtual void Send(const uint8_t* buf, int len, FrameType frameType) = 0;
+    virtual void Send(const uint8_t* buf, std::size_t len, FrameType frameType) = 0;
     virtual State GetState() = 0;
     virtual Error GetError() = 0;
     virtual bool IsConnected() = 0;
     virtual Protocol GetProtocol() const = 0;
     
-private:
+protected:
     StateChangedHandler stateChangedHandler_{ nullptr };
     FailedHandler failedHandler_{ nullptr };
     ReceivedFrameHandler receivedFrameHandler_{ nullptr };
