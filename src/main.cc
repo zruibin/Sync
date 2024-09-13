@@ -10,35 +10,31 @@
 #include <filesystem>
 #include <string>
 #include <thread>
-#include <chrono>
 #include "sync/sync.h"
+#include "platform/runloop.h"
 
 
 int main() {
+    RunLoopInitMain();
     std::cout << "Hello Sync." << std::endl;
     
     const char *destPath = "/Users/ruibin.chow/Desktop/swiftDemo";
     WalkDirectory(destPath);
     
-    bool isExit = false;
-    std::thread([&isExit] {
+    std::thread([] {
         while (true) {
             std::string str;
             std::getline(std::cin, str);
             std::cout << "输入的字符串是：" << str << std::endl;
             if (str == "exit") {
-                isExit = true;
+                RunLoopRef ref = RunLoopGetMain();
+                ref->isExit = true;
                 break;
             }
         }
     }).detach();
-    while (true) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        if (isExit) {
-            std::cout << "Exit." << std::endl;
-            break;
-        }
-    }
+    
+    RunLoopRun();
 }
 
 
