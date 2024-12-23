@@ -1,0 +1,21 @@
+[
+    {
+        "action": "git",
+        "fileName": "ninja",
+        "url": "git clone -b v1.11.1 --depth=1 https://github.com/ninja-build/ninja.git",
+        "build": "cmake",
+        "args": ""
+    }
+
+    ,
+    {
+        "action": "git",
+        "fileName": "SimpleBLE",
+        "url": "git clone -b v0.8.1 --depth 1 https://github.com/OpenBluetoothToolbox/SimpleBLE.git",
+        "build": "cmake",
+        "target_dir": "simpleble",
+        "args": ""
+    }
+]
+
+
