@@ -12,11 +12,13 @@
 #include <thread>
 #include "sync/sync.h"
 #include "platform/runloop.h"
-
+#include "log/logging.h"
+#include "connection/bluetooth/bluetooth.h"
 
 int main() {
     RunLoopInitMain();
-    std::cout << "Hello Sync." << std::endl;
+    Log(DEBUG) << "Hello Sync.";
+    AsyncPrintBluetooth();
     
     const char *destPath = "/Users/ruibin.chow/Desktop/swiftDemo";
     WalkDirectory(destPath);
@@ -34,6 +36,7 @@ int main() {
         }
     }).detach();
     
+    Log(DEBUG) << "RunLoopRun.";
     RunLoopRun();
 }
 
