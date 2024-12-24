@@ -27,7 +27,7 @@ static void PrintBluetooth() {
         if (peripheral.identifier().size() == 0) {
             return ;
         }
-        Log(DEBUG) << "Found device: " << peripheral.identifier() << " [" << peripheral.address() << "] "
+        Log(DEBUG) << "Obj: " << &peripheral << " Found device: " << peripheral.identifier() << " [" << peripheral.address() << "] "
         << peripheral.rssi() << " dBm" ;
     });
     adapter.set_callback_on_scan_updated([](SimpleBLE::Peripheral peripheral) {
@@ -47,26 +47,27 @@ static void PrintBluetooth() {
     std::vector<SimpleBLE::Peripheral> peripherals = adapter.scan_get_results();
     Log(DEBUG) << "The following devices were found:";
     for (size_t i = 0; i < peripherals.size(); i++) {
-        if (!peripherals[i].is_connectable() || peripherals[i].identifier().size() == 0) {
+        auto& peripheral = peripherals[i];
+        if (!peripheral.is_connectable() || peripheral.identifier().size() == 0) {
             continue;
         }
 
-        std::string connectable_string = peripherals[i].is_connectable() ? "Connectable" : "Non-Connectable";
-        std::string peripheral_string = peripherals[i].identifier() + " [" + peripherals[i].address() + "] " +
-        std::to_string(peripherals[i].rssi()) + " dBm";
+        std::string connectable_string = peripheral.is_connectable() ? "Connectable" : "Non-Connectable";
+        std::string peripheral_string = peripheral.identifier() + " [" + peripheral.address() + "] " +
+        std::to_string(peripheral.rssi()) + " dBm";
         
-        Log(DEBUG) << "[" << i << "] " << peripheral_string << " " << connectable_string;
+        Log(DEBUG) << "Obj: " << &peripheral << " [" << i << "] " << peripheral_string << " " << connectable_string;
         
-        Log(DEBUG) << "    Tx Power: " << std::dec << peripherals[i].tx_power() << " dBm";
-        Log(DEBUG) << "    Address Type: " << peripherals[i].address_type();
+        Log(DEBUG) << "    Tx Power: " << std::dec << peripheral.tx_power() << " dBm";
+        Log(DEBUG) << "    Address Type: " << peripheral.address_type();
         
-        std::vector<SimpleBLE::Service> services = peripherals[i].services();
+        std::vector<SimpleBLE::Service> services = peripheral.services();
         for (auto& service : services) {
             Log(DEBUG) << "    Service UUID: " << service.uuid();
             Log(DEBUG) << "    Service data: " << service.data().toHex();
         }
         
-        std::map<uint16_t, SimpleBLE::ByteArray> manufacturer_data = peripherals[i].manufacturer_data();
+        std::map<uint16_t, SimpleBLE::ByteArray> manufacturer_data = peripheral.manufacturer_data();
         for (auto& [manufacturer_id, data] : manufacturer_data) {
             Log(DEBUG) << "    Manufacturer ID: " << manufacturer_id;
             Log(DEBUG) << "    Manufacturer data: " << data.toHex();
